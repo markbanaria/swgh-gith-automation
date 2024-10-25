@@ -11,7 +11,7 @@
     },
     "contentMetadata": [
         {
-            "order": 1,
+            "order": 0,
             "parent": "",
             "name": "PACS API",
             "type": "apiUrl",
