@@ -1,0 +1,22 @@
+{
+    "productMetadata": {
+        "description": "A sample PACS API",
+        "slug": "pacs",
+        "public": true,
+        "hidden": false,
+        "logo": "",
+        "logoDark": "",
+        "autoPublish": true,
+        "validateAPIs": true
+    },
+    "contentMetadata": [
+        {
+            "order": 1,
+            "parent": "",
+            "name": "PACS API",
+            "type": "apiUrl",
+            "slug": "Adoptions",
+            "contentUrl": "https://app.swaggerhub.com/apis/PrudentialTEST/prudential-pacs_api/1.0.0/swagger.json"
+        }
+    ]
+}
