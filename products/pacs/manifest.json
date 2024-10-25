@@ -2,8 +2,8 @@
     "productMetadata": {
         "description": "A sample PACS API",
         "slug": "pacs",
-        "public": false,
-        "hidden": true,
+        "public": true,
+        "hidden": false,
         "logo": "",
         "logoDark": "",
         "autoPublish": true,
