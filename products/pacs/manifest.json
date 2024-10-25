@@ -21,10 +21,10 @@
         {
             "order": 1,
             "parent": "",
-            "name": "PACS API",
+            "name": "Pets API",
             "type": "apiUrl",
-            "slug": "swagger-hub_portal_api",
-            "contentUrl": "https://app.swaggerhub.com/apis/PrudentialTEST/swagger-hub_portal_api/0.2.0-beta/swagger.json"
+            "slug": "Pets",
+            "contentUrl": "https://api.swaggerhub.com/apis/frank-kilcommins/Pets/1.0.0/swagger.json"
         }
     ]
 }
