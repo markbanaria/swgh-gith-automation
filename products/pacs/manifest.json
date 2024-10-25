@@ -13,6 +13,14 @@
         {
             "order": 0,
             "parent": "",
+            "name": "firstreadme",
+            "slug": "firstreadme",
+            "type": "markdown",
+            "contentUrl": "firstreadme.md"
+        },
+        {
+            "order": 1,
+            "parent": "",
             "name": "PACS API",
             "type": "apiUrl",
             "slug": "Adoptions",
