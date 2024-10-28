@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Entities vs. Tags Table</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .toggle-icon {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .service-col {
+            width: 23.33%;
+        }
+        .paths-col {
+            width: 60%;
+        }
+        .entity-col {
+            width: 16.67%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div id="table-container" class="table-responsive">Loading...</div>
+    </div>
+
+    <script>
+        const SWAGGERHUB_API_KEY = 'a6604ffe-e97d-4fad-8084-9c9195621fe4'; // Replace with actual API key
+        const ENTITIES = ["Symphony", "PACS", "PLUK", "PAMB"];
+        let entitiesData = { Symphony: [], PACS: [], PLUK: [], PAMB: [] };
+        let isGroupedView = true;
+
+        async function fetchApiList() {
+            const apiUrl = 'https://api.swaggerhub.com/apis/PrudentialSymphony?limit=100';
+            const response = await fetch(apiUrl, {
+                headers: { Authorization: `Bearer ${SWAGGERHUB_API_KEY}` }
+            });
+            const apiList = await response.json();
+            return apiList.apis;
+        }
+
+        function extractTag(api, entity) {
+            const nameParts = api.name.replace('API', '').split(' ');
+            const entityIndex = nameParts.indexOf(entity) + 1;
+            return entityIndex < nameParts.length ? nameParts[entityIndex] : null;
+        }
+
+        function getSlugAndVersion(api) {
+            const swaggerProp = api.properties.find(prop => prop.type === "Swagger");
+            const versionProp = api.properties.find(prop => prop.type === "X-Version");
+            return {
+                slug: swaggerProp?.url.split('/').slice(-2, -1)[0],
+                version: versionProp?.value
+            };
+        }
+
+        async function fetchApiDetails(slug, version) {
+            const url = `https://api.swaggerhub.com/apis/PrudentialSymphony/${slug}/${version}`;
+            const response = await fetch(url, {
+                headers: { Authorization: `Bearer ${SWAGGERHUB_API_KEY}` }
+            });
+            return await response.json();
+        }
+
+        function extractPathsByTag(apiDetails, tag) {
+            const paths = [];
+            for (const [path, methods] of Object.entries(apiDetails.paths)) {
+                for (const method in methods) {
+                    if (methods[method].tags?.includes(tag)) {
+                        const methodType = method.toUpperCase();
+                        const badgeClass = methodType === "GET" ? "bg-success" : "bg-primary";
+                        paths.push({ name: path, type: methodType, badgeClass });
+                    }
+                }
+            }
+            return paths;
+        }
+
+        async function getEntityData(apiList, entity) {
+            for (const api of apiList) {
+                if (api.name.includes(entity)) {
+                    const { slug, version } = getSlugAndVersion(api);
+                    if (slug && version) {
+                        const apiDetails = await fetchApiDetails(slug, version);
+
+                        if (entity === "Symphony") {
+                            const tag = extractTag(api, entity);
+                            if (tag) {
+                                const paths = extractPathsByTag(apiDetails, tag);
+                                entitiesData[entity].push({ tagName: tag, paths });
+                            }
+                        } else {
+                            apiDetails.tags.forEach(tagObj => {
+                                const paths = extractPathsByTag(apiDetails, tagObj.name);
+                                entitiesData[entity].push({ tagName: tagObj.name, paths });
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        function generateHtmlTable(entitiesData, isGrouped) {
+            const allPathsMap = new Map();
+
+            ENTITIES.forEach(entity => {
+                entitiesData[entity].forEach(tagData => {
+                    if (isGrouped) {
+                        const pathKey = `${tagData.tagName}`;
+                        if (!allPathsMap.has(pathKey)) {
+                            allPathsMap.set(pathKey, {
+                                service: tagData.tagName.replace('API', '').trim(),
+                                pathInfo: `${tagData.paths.length} paths`,
+                                Symphony: '',
+                                PACS: '',
+                                PLUK: '',
+                                PAMB: ''
+                            });
+                        }
+                        allPathsMap.get(pathKey)[entity] = tagData.paths.length > 0 ? '✅' : '';
+                    } else {
+                        tagData.paths.forEach(pathObj => {
+                            const pathKey = `${tagData.tagName}_${pathObj.name}_${pathObj.type}`;
+                            if (!allPathsMap.has(pathKey)) {
+                                allPathsMap.set(pathKey, {
+                                    service: tagData.tagName.replace('API', '').trim(),
+                                    pathInfo: `<span class="badge ${pathObj.badgeClass} me-1">${pathObj.type}</span> <code>${pathObj.name}</code>`,
+                                    Symphony: '',
+                                    PACS: '',
+                                    PLUK: '',
+                                    PAMB: ''
+                                });
+                            }
+                            allPathsMap.get(pathKey)[entity] = '✅';
+                        });
+                    }
+                });
+            });
+
+            const sortedPaths = Array.from(allPathsMap.values()).sort((a, b) => a.service.localeCompare(b.service));
+
+            const header = `<thead class="table-dark"><tr>
+                <th class="service-col">Service <span id="toggle-icon" class="toggle-icon">${isGrouped ? '[+]' : '[-]'}</span></th>
+                <th class="paths-col">Paths</th>${ENTITIES.map(e => `<th class="entity-col">${e}</th>`).join('')}
+            </tr></thead>`;
+            const rows = sortedPaths.map(pathObj => `
+                <tr>
+                    <td>${pathObj.service}</td>
+                    <td>${pathObj.pathInfo}</td>
+                    ${ENTITIES.map(entity => `<td>${pathObj[entity] || ""}</td>`).join('')}
+                </tr>
+            `).join('');
+
+            document.getElementById("table-container").innerHTML = `<table class="table table-bordered">${header}<tbody>${rows}</tbody></table>`;
+            document.getElementById("toggle-icon").addEventListener("click", toggleView);
+        }
+
+        function toggleView() {
+            isGroupedView = !isGroupedView;
+            generateHtmlTable(entitiesData, isGroupedView);
+        }
+
+        async function displayData() {
+            try {
+                const apiList = await fetchApiList();
+                await Promise.all(ENTITIES.map(entity => getEntityData(apiList, entity)));
+                generateHtmlTable(entitiesData, isGroupedView);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('table-container').textContent = 'Failed to load data.';
+            }
+        }
+
+        displayData();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

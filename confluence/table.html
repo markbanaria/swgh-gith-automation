@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tag Table</title>
+</head>
+<body>
+    <h1>API Entities vs. Tags Table</h1>
+    <div id="table-container">Loading...</div>
+
+    <script>
+        const SWAGGERHUB_API_KEY = 'a6604ffe-e97d-4fad-8084-9c9195621fe4'; // Replace with actual API key
+
+        async function fetchApiList() {
+            const apiUrl = 'https://api.swaggerhub.com/apis/PrudentialSymphony?limit=100';
+            try {
+                const response = await fetch(apiUrl, {
+                    headers: {
+                        Authorization: `Bearer ${SWAGGERHUB_API_KEY}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const apiList = await response.json();
+                return apiList.apis;
+            } catch (error) {
+                console.error("Error fetching API list:", error);
+                throw error;
+            }
+        }
+
+        function extractSymphonyTags(apiList) {
+            return apiList
+                .filter(api => api.name.includes('Symphony'))
+                .map(api => {
+                    const nameParts = api.name.split(' ');
+                    const tagIndex = nameParts.indexOf('Symphony') + 1;
+                    return tagIndex < nameParts.length ? nameParts[tagIndex] : null;
+                })
+                .filter(tag => tag);
+        }
+
+        async function fetchCountryTags(apiList, entity) {
+            const relevantApis = apiList.filter(api => api.name.includes(entity));
+            const tags = [];
+            for (const api of relevantApis) {
+                const swaggerProp = api.properties.find(prop => prop.type === 'Swagger');
+                if (swaggerProp) {
+                    const response = await fetch(swaggerProp.url, {
+                        headers: {
+                            Authorization: `Bearer ${SWAGGERHUB_API_KEY}`
+                        }
+                    });
+                    const apiDetails = await response.json();
+                    tags.push(...(apiDetails.tags.map(tag => tag.name) || []));
+                }
+            }
+            return Array.from(new Set(tags));
+        }
+
+        function generateHtmlTable(entitiesTags) {
+            const allTags = [...new Set(entitiesTags.flatMap(entity => entity.tags))];
+            const header = `<tr><th>Service</th>${entitiesTags.map(e => `<th>${e.entity}</th>`).join('')}</tr>`;
+            const rows = allTags.map(tag => {
+                const row = entitiesTags.map(entity => `<td>${entity.tags.includes(tag) ? '✅' : ''}</td>`).join('');
+                return `<tr><td>${tag}</td>${row}</tr>`;
+            }).join('');
+            return `<table border="1">${header}${rows}</table>`;
+        }
+
+        async function displayData() {
+            try {
+                const apiList = await fetchApiList();
+                const entities = ['Symphony', 'PACS', 'PLUK', 'PAMB'];
+                const entitiesTags = [];
+
+                for (const entity of entities) {
+                    const tags = entity === 'Symphony'
+                        ? extractSymphonyTags(apiList)
+                        : await fetchCountryTags(apiList, entity);
+                    entitiesTags.push({ entity, tags });
+                }
+
+                const tableHtml = generateHtmlTable(entitiesTags);
+                document.getElementById('table-container').innerHTML = tableHtml;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('table-container').textContent = 'Failed to load data.';
+            }
+        }
+
+        displayData();
+    </script>
+</body>
+</html>
