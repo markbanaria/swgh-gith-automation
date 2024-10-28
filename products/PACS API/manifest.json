@@ -4,10 +4,10 @@
         "slug": "pacs-api",
         "public": false,
         "hidden": false,
-        "logo": "images/pacs-api-icon/icon.png",
-        "logoDark": "images/pacs-api-icon/icon-dark.png",
+        "logo": "images/icon.png",
+        "logoDark": "images/icon-dark.png",
         "autoPublish": false,
-        "validateAPIs": false
+        "validateAPIs": true
     },
     "contentMetadata": [
         {
