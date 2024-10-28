@@ -2,11 +2,11 @@
     "productMetadata": {
         "description": "Symphony APIs for PACS",
         "slug": "pacs-api",
-        "public": false,
+        "public": true,
         "hidden": false,
         "logo": "images/icon.png",
         "logoDark": "images/icon-dark.png",
-        "autoPublish": false,
+        "autoPublish": true,
         "validateAPIs": true
     },
     "contentMetadata": [
