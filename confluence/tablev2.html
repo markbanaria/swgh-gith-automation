@@ -27,9 +27,10 @@
     </div>
 
     <script>
-        const SWAGGERHUB_API_KEY = 'a6604ffe-e97d-4fad-8084-9c9195621fe4'; // Replace with actual API key
-        const ENTITIES = ["Symphony", "PACS", "PLUK", "PAMB"];
-        let entitiesData = { Symphony: [], PACS: [], PLUK: [], PAMB: [] };
+        const SWAGGERHUB_API_KEY = ''; // Replace with actual API key
+        const ENTITIES = ["Symphony", "PACS", "PLUK", "PAMB", "PLAI"];
+        let entitiesData = { Symphony: [], PACS: [], PLUK: [], PAMB: [], PLAI: [] };
+        let symphonyPaths = new Set(); // Store Symphony paths only
         let isGroupedView = true;
 
         async function fetchApiList() {
@@ -41,9 +42,9 @@
             return apiList.apis;
         }
 
-        function extractTag(api, entity) {
+        function extractTag(api) {
             const nameParts = api.name.replace('API', '').split(' ');
-            const entityIndex = nameParts.indexOf(entity) + 1;
+            const entityIndex = nameParts.indexOf("Symphony") + 1;
             return entityIndex < nameParts.length ? nameParts[entityIndex] : null;
         }
 
@@ -78,25 +79,36 @@
             return paths;
         }
 
-        async function getEntityData(apiList, entity) {
+        async function getSymphonyData(apiList) {
+            for (const api of apiList) {
+                if (api.name.includes("Symphony")) {
+                    const { slug, version } = getSlugAndVersion(api);
+                    if (slug && version) {
+                        const apiDetails = await fetchApiDetails(slug, version);
+                        const tag = extractTag(api);
+                        if (tag) {
+                            const paths = extractPathsByTag(apiDetails, tag);
+                            entitiesData.Symphony.push({ tagName: tag, paths });
+                            paths.forEach(pathObj => symphonyPaths.add(pathObj.name)); // Add to Symphony path set
+                        }
+                    }
+                }
+            }
+        }
+
+        async function getFilteredEntityData(apiList, entity) {
             for (const api of apiList) {
                 if (api.name.includes(entity)) {
                     const { slug, version } = getSlugAndVersion(api);
                     if (slug && version) {
                         const apiDetails = await fetchApiDetails(slug, version);
-
-                        if (entity === "Symphony") {
-                            const tag = extractTag(api, entity);
-                            if (tag) {
-                                const paths = extractPathsByTag(apiDetails, tag);
-                                entitiesData[entity].push({ tagName: tag, paths });
-                            }
-                        } else {
-                            apiDetails.tags.forEach(tagObj => {
-                                const paths = extractPathsByTag(apiDetails, tagObj.name);
+                        apiDetails.tags.forEach(tagObj => {
+                            const paths = extractPathsByTag(apiDetails, tagObj.name)
+                                .filter(pathObj => symphonyPaths.has(pathObj.name)); // Filter paths by Symphony
+                            if (paths.length) {
                                 entitiesData[entity].push({ tagName: tagObj.name, paths });
-                            });
-                        }
+                            }
+                        });
                     }
                 }
             }
@@ -165,7 +177,10 @@
         async function displayData() {
             try {
                 const apiList = await fetchApiList();
-                await Promise.all(ENTITIES.map(entity => getEntityData(apiList, entity)));
+                await getSymphonyData(apiList); // Get Symphony data and paths
+                await Promise.all(
+                    ENTITIES.filter(entity => entity !== "Symphony").map(entity => getFilteredEntityData(apiList, entity))
+                );
                 generateHtmlTable(entitiesData, isGroupedView);
             } catch (error) {
                 console.error('Error loading data:', error);
