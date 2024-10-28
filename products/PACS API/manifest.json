@@ -1,0 +1,31 @@
+{
+    "productMetadata": {
+        "description": "Symphony APIs for PACS",
+        "slug": "pacs-api",
+        "public": false,
+        "hidden": false,
+        "logo": "images/pacs-api-icon/icon.png",
+        "logoDark": "images/pacs-api-icon/icon-dark.png",
+        "autoPublish": false,
+        "validateAPIs": false
+    },
+    "contentMetadata": [
+        {
+            "order": 0,
+            "parent": "",
+            "name": "Description",
+            "slug":"description",
+            "type": "markdown",
+            "contentUrl": "description.md"
+        },
+        {
+            "order": 1,
+            "parent": "",
+            "name": "PACS API",
+            "slug":"prudential-symphony-pacs-api",
+            "type": "apiUrl",
+            "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pacs-api/latest/swagger.json"
+        }
+
+    ]
+}
