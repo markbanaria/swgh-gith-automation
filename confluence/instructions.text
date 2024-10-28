@@ -1,0 +1,139 @@
+Round 1
+
+1. Get API List 
+    url: https://api.swaggerhub.com/apis/PrudentialSymphony
+    Auth: Bearer + SWAGGERHUB_API_KEY (from ../.env)
+    restuls = ApiList
+
+2. Get universal API Summary
+    For each item in ApiList that contains in the names (Symphony)
+    Save the word after "symphony" as a tag. eg. Prudential Symphony Agent API. Save "Agent"
+
+    remember the tags under the entity Symphony
+
+    For each of these tags
+        GetSlugAndVersion(item)
+            {slug} item.properties[the element with type "Swagger"] result is like this "https://api.swaggerhub.com/apis/PrudentialSymphony/experience-api/1.0.0"
+            {version} item.properties[the element with type "X-version"]
+
+        GetTags(name, version)
+            Get API Details
+                url: https://api.swaggerhub.com/apis/PrudentialSymphony/{slug}/{version}
+                Auth: Bearer + SWAGGERHUB_API_KEY (from ../.env)
+                results: results
+
+        Get pathsUnderEachTag
+            in the API Details look for results.paths object
+            
+        create this 
+        entities: {
+            Symphony: {
+                [
+                    {
+                        tagName: "Agent"
+                        paths: [
+                            name: "/v1/search/"
+                            type: "GET" or "POST"
+                        ]
+                    }
+                ]
+            },
+        }
+            
+
+3. Get Country API Summary
+    For each item in ApiList that contains in the names (PLUK, PAMB, PACS)
+        GetSlugAndVersion(item)
+            {slug} item.properties[the element with type "Swagger"] result is like this "https://api.swaggerhub.com/apis/PrudentialSymphony/experience-api/1.0.0"
+            {version} item.properties[the element with type "X-version"]
+
+        GetTags(name, version)
+            Get API Details
+                url: https://api.swaggerhub.com/apis/PrudentialSymphony/{slug}/{version}
+                Auth: Bearer + SWAGGERHUB_API_KEY (from ../.env)
+                results: results
+
+        Get pathsUnderEachTag
+            in the API Details look for results.paths object
+            sort each path under 
+
+        add these to entities
+        entities: {
+            Symphony: {
+                [
+                    {
+                        tagName: "Agent"
+                        paths: [
+                            name: "/v1/search/"
+                            type: "GET" or "POST"
+                        ]
+                    }
+                ]
+            },
+            PACS: {
+                [
+                    {
+                        tagName: "Agent"
+                        paths: [
+                            name: "/v1/search/"
+                            type: "GET" or "POST"
+                        ]
+                    }
+                ]
+            },
+        }
+            
+
+4. Generate a Markdown Table with
+
+entites (Symphony, PACS, PLUK...) vs tags
+
+| Service | Symphony | PACS | PLUK | PAMB |
+|---------|----------|------|------|------|
+| {tags}  | ✅       | ✅    |     |       |
+
+Round 2
+
+Update this table generator to instead do:
+
+use bootstrap cdn
+
+display
+    row (5 cols)
+    "Service" Entities
+
+    row (1 col) 
+        For each tag name
+            Accordion
+                row (5 cols)
+                    tag name | ✅...
+                row (5 cols)
+                    Pill (get or post), space, apidetails.paths(that have tags = to the tag in the parent accordion).(paramenter name) | ✅... 
+
+Round 3
+
+1. Get API List 
+    url: https://api.swaggerhub.com/apis/PrudentialSymphony
+    Auth: Bearer + SWAGGERHUB_API_KEY (from ../.env)
+    restuls = ApiList
+
+2. Get universal API Summary
+    For each item in ApiList that contains in the names (Symphony)
+    Save the word after "symphony" as a tag. eg. Prudential Symphony Agent API. Save "Agent"
+
+    
+
+    remember the tags under the entity Symphony
+
+3. Get Country API Summary
+    For each item in ApiList that contains in the names (PLUK, PAMB, PACS)
+        GetSlugAndVersion(item)
+            {slug} item.properties[the element with type "Swagger"] result is like this "https://api.swaggerhub.com/apis/PrudentialSymphony/experience-api/1.0.0"
+            {version} item.properties[the element with type "X-version"]
+
+        GetTags(name, version)
+            Get API Details
+                url: https://api.swaggerhub.com/apis/PrudentialSymphony/{slug}/{version}
+                Auth: Bearer + SWAGGERHUB_API_KEY (from ../.env)
+            
+        remember the tags under this entity
