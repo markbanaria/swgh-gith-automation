@@ -24,7 +24,7 @@
             "name": "PACS API",
             "slug":"prudential-symphony-pacs-api",
             "type": "apiUrl",
-            "contentUrl": "https://app.swaggerhub.com/apiproxy/schema/file/PrudentialSymphony/prudential-symphony-pacs-api/1.0.0/swagger.json"
+            "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pacs-api/1.0.0/swagger.json"
         }
 
     ]
