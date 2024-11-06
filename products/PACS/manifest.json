@@ -1,1 +1,70 @@
-{}
+{
+  "productMetadata": {
+    "description": "PACS APIs",
+    "slug": "pacs-api",
+    "public": true,
+    "hidden": false,
+    "logo": "images/icon.png",
+    "logoDark": "images/icon-dark.png",
+    "autoPublish": true,
+    "validateAPIs": true
+  },
+  "contentMetadata": [
+    {
+      "order": 0,
+      "parent": "",
+      "name": "Description",
+      "slug": "description",
+      "type": "markdown",
+      "contentUrl": "description.md"
+    },
+    {
+      "order": 1,
+      "parent": "",
+      "name": "PACS - Document Generation Service",
+      "slug": "pacs-document-generation-service-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-document-generation-service-api/1.0.0/swagger.json"
+    },
+    {
+      "order": 2,
+      "parent": "",
+      "name": "PACS - Document Storage Service",
+      "slug": "pacs-document-storage-service-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-document-storage-service-api/v2.0/swagger.json"
+    },
+    {
+      "order": 3,
+      "parent": "",
+      "name": "PACS - Notification Service",
+      "slug": "pacs-notification-service-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-notification-service-api/v1.0/swagger.json"
+    },
+    {
+      "order": 4,
+      "parent": "",
+      "name": "PACS - VPMS",
+      "slug": "pacs-vpms-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-vpms-api/v1/swagger.json"
+    },
+    {
+      "order": 5,
+      "parent": "",
+      "name": "Prudential PACS",
+      "slug": "prudential-symphony-pacs-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pacs-api/1.0.0/swagger.json"
+    },
+    {
+      "order": 6,
+      "parent": "",
+      "name": "PACS - UAAS Service",
+      "slug": "uaas-service-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/uaas-service-api/v1.0/swagger.json"
+    }
+  ]
+}

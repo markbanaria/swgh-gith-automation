@@ -1,1 +1,30 @@
-{}
+{
+  "productMetadata": {
+    "description": "Policy APIs",
+    "slug": "policy-api",
+    "public": true,
+    "hidden": false,
+    "logo": "images/icon.png",
+    "logoDark": "images/icon-dark.png",
+    "autoPublish": true,
+    "validateAPIs": true
+  },
+  "contentMetadata": [
+    {
+      "order": 0,
+      "parent": "",
+      "name": "Description",
+      "slug": "description",
+      "type": "markdown",
+      "contentUrl": "description.md"
+    },
+    {
+      "order": 1,
+      "parent": "",
+      "name": "Policy",
+      "slug": "prudential-symphony-policy-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-policy-api/1.0.0/swagger.json"
+    }
+  ]
+}

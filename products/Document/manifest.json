@@ -1,1 +1,30 @@
-{}
+{
+  "productMetadata": {
+    "description": "Document APIs",
+    "slug": "document-api",
+    "public": true,
+    "hidden": false,
+    "logo": "images/icon.png",
+    "logoDark": "images/icon-dark.png",
+    "autoPublish": true,
+    "validateAPIs": true
+  },
+  "contentMetadata": [
+    {
+      "order": 0,
+      "parent": "",
+      "name": "Description",
+      "slug": "description",
+      "type": "markdown",
+      "contentUrl": "description.md"
+    },
+    {
+      "order": 1,
+      "parent": "",
+      "name": "Document",
+      "slug": "prudential-symphony-document-api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-document-api/1.0.0/swagger.json"
+    }
+  ]
+}
