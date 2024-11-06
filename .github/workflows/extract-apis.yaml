@@ -39,7 +39,7 @@ jobs:
       - name: Process and group APIs from SwaggerHub
         id: process_grouped_json
         run: |
-          import json, os
+          import json
 
           # Load SwaggerHub APIs response
           with open("swaggerhub_apis.json") as file:
@@ -129,22 +129,11 @@ jobs:
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Save the grouped JSON to an environment file
-          with open("grouped_apis.json", "w") as outfile:
-              json.dump(groups, outfile, indent=2)
+          # Write the grouped data as an environment file for output
+          with open("${{ github.env }}", "a") as env_file:
+              env_file.write("grouped_json=" + json.dumps(groups))
 
-          # Set grouped JSON as an output for Job 2 and beyond
-          print(f"grouped_json={json.dumps(groups)}")
-
-    - name: Commit grouped_apis.json
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add grouped_apis.json
-        git commit -m "Add consolidated grouped_apis.json file"
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: python
 
   generate-folders-and-files:
     runs-on: ubuntu-latest
@@ -155,35 +144,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Generate folders and files
+      - name: Create folders and files for each group
         run: |
           import json, os
 
-          # Load grouped JSON from consolidated file
-          with open("grouped_apis.json") as file:
-              groups = json.load(file)
+          # Load grouped JSON data from previous job output
+          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
 
-          # Create folders and files
+          # Iterate over each group to create folders and files
           for group_name, apis in groups.items():
+              # Create the folder path
               folder_path = os.path.join("products", group_name)
               os.makedirs(folder_path, exist_ok=True)
 
               # Create manifest.json and description.md
               with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                  manifest_file.write("{}")
+                  manifest_file.write("{}")  # Placeholder, content will be added in next job
 
               with open(os.path.join(folder_path, "description.md"), "w") as description_file:
-                  description_file.write(f"# {group_name}\n")
+                  description_file.write(f"# {group_name}\n")  # Placeholder title for description
+        shell: python
 
-      - name: Commit generated folders and files
+      - name: List directory structure
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add products/
-          git commit -m "Create folders and placeholders for manifest.json and description.md"
-          git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "Directory structure:"
+          find products/ -type d -or -type f
+
+      - name: Display file contents for verification
+        run: |
+          echo "Contents of manifest.json and description.md for each group:"
+          for dir in products/*; do
+            echo "Directory: $dir"
+            cat "$dir/manifest.json"
+            cat "$dir/description.md"
+          done
 
   populate-content:
     runs-on: ubuntu-latest
@@ -198,14 +192,14 @@ jobs:
         run: |
           import json, os
 
-          # Load grouped JSON data from grouped_apis.json
-          with open("grouped_apis.json") as file:
-              groups = json.load(file)
+          # Load grouped JSON data from the previous job output
+          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
 
+          # Populate each file with API data
           for group_name, apis in groups.items():
               folder_path = os.path.join("products", group_name)
               
-              # Create manifest.json content
+              # Populate manifest.json with metadata for each API
               manifest_content = {
                   "productMetadata": {
                       "description": f"Symphony APIs for {group_name}",
@@ -229,6 +223,7 @@ jobs:
                   ]
               }
 
+              # Add each API as a contentMetadata entry
               for i, api in enumerate(apis, start=1):
                   manifest_content["contentMetadata"].append({
                       "order": i,
@@ -239,22 +234,15 @@ jobs:
                       "contentUrl": f"{api['url']}/swagger.json"
                   })
 
+              # Write manifest.json with the updated content
               with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
                   json.dump(manifest_content, manifest_file, indent=2)
 
+              # Populate description.md with the revised header and list of APIs
               description_content = f"# {group_name} Group\nThis page contains APIs related to {group_name}.\n\n## APIs in this group\n"
               for api in apis:
                   description_content += f"- **{api['name']}** (v{api['latest_version']})\n"
-
+              
               with open(os.path.join(folder_path, "description.md"), "w") as description_file:
                   description_file.write(description_content)
-
-      - name: Commit populated files
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add products/
-          git commit -m "Populate manifest.json and description.md with API data"
-          git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: python
