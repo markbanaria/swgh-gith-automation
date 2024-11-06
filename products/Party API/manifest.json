@@ -4,8 +4,8 @@
     "slug": "party-api",
     "public": true,
     "hidden": false,
-    "logo": "images/icon.png",
-    "logoDark": "images/icon-dark.png",
+    "logo": "",
+    "logoDark": "",
     "autoPublish": true,
     "validateAPIs": true
   },
