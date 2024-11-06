@@ -1,1 +1,4 @@
-# PAMB\n\nThis page contains APIs related to PAMB.\n- Prudential PAMB (Version: 1.0.0)\n
+# PAMB
+
+This page contains APIs related to PAMB.
+- Prudential PAMB (Version: 1.0.0)

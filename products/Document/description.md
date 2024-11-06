@@ -1,1 +1,4 @@
-# Document\n\nThis page contains APIs related to Document.\n- Document (Version: 1.0.0)\n
+# Document
+
+This page contains APIs related to Document.
+- Document (Version: 1.0.0)

@@ -1,1 +1,4 @@
-# Payment\n\nThis page contains APIs related to Payment.\n- Payment (Version: 1.0.0)\n
+# Payment
+
+This page contains APIs related to Payment.
+- Payment (Version: 1.0.0)

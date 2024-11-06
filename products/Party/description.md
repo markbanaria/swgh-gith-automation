@@ -1,1 +1,4 @@
-# Party\n\nThis page contains APIs related to Party.\n- Party (Version: 1.0.0)\n
+# Party
+
+This page contains APIs related to Party.
+- Party (Version: 1.0.0)
