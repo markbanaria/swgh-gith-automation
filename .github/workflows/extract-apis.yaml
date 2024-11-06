@@ -1,0 +1,132 @@
+name: Publish Portal Content (Cron)
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      log_level:
+        description: 'Log level: 1=DEBUG, 2=INFO, 3=WARNING, 4=ERROR'
+        required: false
+        default: '2' # Set the default log level to INFO
+      skip_api_linting:
+        description: 'Skip the API linting job'
+        required: false
+        default: 'false'        
+
+env:
+  SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
+  SWAGGERHUB_ORG_NAME: ${{ vars.SWAGGERHUB_ORG_NAME }}
+
+jobs:
+  configure-readme-and-config:
+    runs-on: ubuntu-latest
+    environment: Production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Fetch list of APIs from SwaggerHub
+        run: |
+          curl -H "Authorization: $SWAGGERHUB_API_KEY" \
+               -H "Accept: application/json" \
+               "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
+
+      - name: Process and group APIs from SwaggerHub
+        run: |
+          import json
+
+          # Load SwaggerHub APIs response
+          with open("swaggerhub_apis.json") as file:
+              data = json.load(file)
+
+          # Initialize groups
+          groups = {
+              "PACS": [],
+              "PLUK": [],
+              "PLAI": [],
+              "PVA": [],
+              "PAMB": [],
+              "Symphony Big Group": []
+          }
+
+          symphony_domains = {}  # For domain-based groups
+
+          # Process each API entry
+          for api in data['apis']:
+              name = api['name']
+              properties = {prop['type']: prop.get('value', prop.get('url', '')) for prop in api['properties']}
+              url = properties.get("Swagger", "")
+              slug = url.split("/")[-2] if url else ""
+              latest_version = properties.get("X-Version", "N/A")
+
+              # Skip drafts
+              if "(DRAFT)" in name:
+                  continue
+
+              # Remove "Prudential Symphony" and "API" from name
+              formatted_name = name.replace("Prudential Symphony", "").replace("API", "").strip()
+
+              # Determine group
+              if "PACS" in name:
+                  groups["PACS"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PLUK" in name:
+                  groups["PLUK"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PLAI" in name:
+                  groups["PLAI"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PVA" in name:
+                  groups["PVA"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PAMB" in name:
+                  groups["PAMB"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "Prudential Symphony API" == name:  # Symphony Big Group
+                  groups["Symphony Big Group"].append({
+                      "name": "Symphony",
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "Prudential Symphony" in name:  # Domain-based grouping
+                  domain = formatted_name
+                  if domain not in symphony_domains:
+                      symphony_domains[domain] = []
+                  symphony_domains[domain].append({
+                      "name": domain,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+
+          # Merge symphony domains with main groups
+          groups.update(symphony_domains)
+
+          # Save grouped data to a JSON file
+          with open("grouped_apis.json", "w") as outfile:
+              json.dump(groups, outfile, indent=2)
+
+        shell: python
