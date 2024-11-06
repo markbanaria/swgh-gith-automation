@@ -191,8 +191,8 @@ jobs:
               }
 
               # Create manifest.json and description.md
-              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                  manifest_file.write("{}")  # Placeholder, content will be added in next job
+              with open(os.path.join(folder_path, 'manifest.json'), 'w') as manifest_file:
+                  json.dump(manifest_data, manifest_file, indent=2)
 
               # Create and populate description.md
               with open(os.path.join(folder_path, 'description.md'), 'w') as description_file:
