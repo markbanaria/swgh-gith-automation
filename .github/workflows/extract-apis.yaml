@@ -177,3 +177,67 @@ jobs:
             cat "$dir/manifest.json"
             cat "$dir/description.md"
           done
+
+  update-content:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: generate-folders-and-files
+  
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+  
+      - name: Update content in manifest.json and description.md
+        run: |
+          import json, os
+  
+          # Load the grouped JSON data
+          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
+  
+          # Iterate over each group to update files
+          for group_name, apis in groups.items():
+              folder_path = os.path.join("products", group_name)
+  
+              # Update manifest.json
+              manifest_data = {
+                  "productMetadata": {
+                      "description": f"{group_name} APIs",
+                      "slug": f"{group_name.lower()}-api",
+                      "public": True,
+                      "hidden": False,
+                      "logo": "images/icon.png",
+                      "logoDark": "images/icon-dark.png",
+                      "autoPublish": True,
+                      "validateAPIs": True
+                  },
+                  "contentMetadata": [
+                      {
+                          "order": 0,
+                          "parent": "",
+                          "name": "Description",
+                          "slug": "description",
+                          "type": "markdown",
+                          "contentUrl": "description.md"
+                      }
+                  ] + [
+                      {
+                          "order": idx + 1,
+                          "parent": "",
+                          "name": api["name"],
+                          "slug": api["slug"],
+                          "type": "apiUrl",
+                          "contentUrl": api["url"] + "/swagger.json"
+                      }
+                      for idx, api in enumerate(apis)
+                  ]
+              }
+              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
+                  json.dump(manifest_data, manifest_file, indent=2)
+  
+              # Update description.md
+              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
+                  description_file.write(f"# {group_name}\n\nThis page contains APIs related to {group_name}.\n")
+                  for api in apis:
+                      description_file.write(f"- {api['name']} (Version: {api['latest_version']})\n")
+  
+        shell: python
