@@ -1,0 +1,30 @@
+{
+  "productMetadata": {
+    "description": "All Symphony APIs",
+    "slug": "all symphony-api",
+    "public": true,
+    "hidden": false,
+    "logo": "images/icon.png",
+    "logoDark": "images/icon-dark.png",
+    "autoPublish": true,
+    "validateAPIs": true
+  },
+  "contentMetadata": [
+    {
+      "order": 0,
+      "parent": "",
+      "name": "Description",
+      "slug": "description",
+      "type": "markdown",
+      "contentUrl": "description.md"
+    },
+    {
+      "order": 1,
+      "parent": "",
+      "name": "Symphony",
+      "slug": "prudential-symphony_api",
+      "type": "apiUrl",
+      "contentUrl": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony_api/1.0.0/swagger.json"
+    }
+  ]
+}
