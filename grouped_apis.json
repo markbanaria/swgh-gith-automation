@@ -1,0 +1,136 @@
+{
+  "PACS": [
+    {
+      "name": "PACS - Document Generation Service",
+      "slug": "pacs-document-generation-service-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-document-generation-service-api/1.0.0"
+    },
+    {
+      "name": "PACS - Document Storage Service",
+      "slug": "pacs-document-storage-service-api",
+      "latest_version": "v2.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-document-storage-service-api/v2.0"
+    },
+    {
+      "name": "PACS - Notification Service",
+      "slug": "pacs-notification-service-api",
+      "latest_version": "v1.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-notification-service-api/v1.0"
+    },
+    {
+      "name": "PACS - VPMS",
+      "slug": "pacs-vpms-api",
+      "latest_version": "v1",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/pacs-vpms-api/v1"
+    },
+    {
+      "name": "Prudential PACS",
+      "slug": "prudential-symphony-pacs-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pacs-api/1.0.0"
+    },
+    {
+      "name": "PACS - UAAS Service",
+      "slug": "uaas-service-api",
+      "latest_version": "v1.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/uaas-service-api/v1.0"
+    }
+  ],
+  "PLUK": [
+    {
+      "name": "Prudential PLUK s",
+      "slug": "prudential-symphony-pluk-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pluk-api/1.0.0"
+    }
+  ],
+  "PLAI": [
+    {
+      "name": "Prudential PLAI/PSLA",
+      "slug": "prudential-symphony-plai-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-plai-api/1.0.0"
+    }
+  ],
+  "PVA": [
+    {
+      "name": "Prudential PVA",
+      "slug": "prudential-symphony-pva-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pva-api/1.0.0"
+    }
+  ],
+  "PAMB": [
+    {
+      "name": "Prudential PAMB",
+      "slug": "prudential-symphony-pamb-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-pamb-api/1.0.0"
+    }
+  ],
+  "Symphony Big Group": [
+    {
+      "name": "Symphony",
+      "slug": "prudential-symphony_api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony_api/1.0.0"
+    }
+  ],
+  "Agent": [
+    {
+      "name": "Agent",
+      "slug": "prudential-symphony-agent-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-agent-api/1.0.0"
+    }
+  ],
+  "Claim": [
+    {
+      "name": "Claim",
+      "slug": "prudential-symphony-claim-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-claim-api/1.0.0"
+    }
+  ],
+  "Document": [
+    {
+      "name": "Document",
+      "slug": "prudential-symphony-document-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-document-api/1.0.0"
+    }
+  ],
+  "Investment": [
+    {
+      "name": "Investment",
+      "slug": "prudential-symphony-investment-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-investment-api/1.0.0"
+    }
+  ],
+  "Party": [
+    {
+      "name": "Party",
+      "slug": "prudential-symphony-party-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-party-api/1.0.0"
+    }
+  ],
+  "Payment": [
+    {
+      "name": "Payment",
+      "slug": "prudential-symphony-payment-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-payment-api/1.0.0"
+    }
+  ],
+  "Policy": [
+    {
+      "name": "Policy",
+      "slug": "prudential-symphony-policy-api",
+      "latest_version": "1.0.0",
+      "url": "https://api.swaggerhub.com/apis/PrudentialSymphony/prudential-symphony-policy-api/1.0.0"
+    }
+  ]
+}
