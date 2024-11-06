@@ -181,26 +181,18 @@ jobs:
   update-content:
     runs-on: ubuntu-latest
     environment: Production
-    needs: generate-folders-and-files
+    needs: [fetch-and-group-apis, generate-folders-and-files]
   
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
   
-      - name: Debug grouped_json content
-        run: |
-          echo "Grouped JSON content:"
-          echo "${{ needs.fetch-and-group-apis.outputs.grouped_json }}"
-  
       - name: Update content in manifest.json and description.md
         run: |
           import json, os
   
-          # Load the grouped JSON data from environment variable
+          # Load the grouped JSON data from Job 1 output
           grouped_json = '${{ needs.fetch-and-group-apis.outputs.grouped_json }}'
-          if not grouped_json:
-              raise ValueError("Grouped JSON data is empty.")
-  
           groups = json.loads(grouped_json)
   
           # Iterate over each group to update files
