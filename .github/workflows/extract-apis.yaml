@@ -161,12 +161,12 @@ jobs:
                   'productMetadata': {
                       'description': f'{group_name} APIs',
                       'slug': f'{group_name.lower()}-api',
-                      'public': true,
-                      'hidden': false,
+                      'public': True,
+                      'hidden': False,
                       'logo': '',
                       'logoDark': '',
-                      'autoPublish': true,
-                      'validateAPIs': true
+                      'autoPublish': True,
+                      'validateAPIs': True
                   },
                   'contentMetadata': [
                       {
