@@ -52,7 +52,7 @@ jobs:
               "PLAI": [],
               "PVA": [],
               "PAMB": [],
-              "Symphony Big Group": []
+              "All Symphony APIs": []
           }
 
           symphony_domains = {}  # For domain-based groups
@@ -108,8 +108,8 @@ jobs:
                       "latest_version": latest_version,
                       "url": url
                   })
-              elif "Prudential Symphony API" == name:  # Symphony Big Group
-                  groups["Symphony Big Group"].append({
+              elif "Prudential Symphony API" == name:  # All Symphony APIs
+                  groups["All Symphony APIs"].append({
                       "name": "Symphony",
                       "slug": slug,
                       "latest_version": latest_version,
@@ -153,7 +153,7 @@ jobs:
           # Iterate over each group to create folders and files
           for group_name, apis in groups.items():
               # Create the folder path
-              folder_path = os.path.join("products", group_name)
+              folder_path = os.path.join("products", f"{group_name} API")
               os.makedirs(folder_path, exist_ok=True)
 
               # Create and populate manifest.json
