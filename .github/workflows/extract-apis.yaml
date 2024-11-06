@@ -52,7 +52,7 @@ jobs:
               "PLAI": [],
               "PVA": [],
               "PAMB": [],
-              "All Symphony APIs": []
+              "Symphony": []
           }
 
           symphony_domains = {}  # For domain-based groups

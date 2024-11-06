@@ -1,19 +1,11 @@
 name: Publish Portal Content
 
+
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-    inputs:
-      log_level:
-        description: 'Log level: 1=DEBUG, 2=INFO, 3=WARNING, 4=ERROR'
-        required: false
-        default: '2' # Set the default log level to INFO
-      skip_api_linting:
-        description: 'Skip the API linting job'
-        required: false
-        default: 'false'        
+  workflow_run:
+    workflows: ["Generate Configs (Cron)"]
+    types:
+      - completed        
 
 env:
   SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
