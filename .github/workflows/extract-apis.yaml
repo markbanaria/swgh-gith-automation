@@ -129,8 +129,9 @@ jobs:
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Set the output for the grouped JSON
-          print("::set-output name=grouped_data::" + json.dumps(groups))
+          # Write the grouped data as an environment file for output
+          with open("${{ github.env }}", "a") as env_file:
+              env_file.write("grouped_json=" + json.dumps(groups))
 
         shell: python
 
