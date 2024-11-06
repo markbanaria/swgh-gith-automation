@@ -19,148 +19,122 @@ env:
   SWAGGERHUB_ORG_NAME: ${{ vars.SWAGGERHUB_ORG_NAME }}
 
 jobs:
-fetch-and-group-apis:
-  runs-on: ubuntu-latest
-  environment: Production
+  fetch-and-group-apis:
+    runs-on: ubuntu-latest
+    environment: Production
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    outputs:
+      grouped_json: ${{ steps.process_grouped_json.outputs.grouped_data }}
 
-    - name: Fetch list of APIs from SwaggerHub
-      run: |
-        curl -H "Authorization: $SWAGGERHUB_API_KEY" \
-             -H "Accept: application/json" \
-             "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Process and group APIs from SwaggerHub
-      id: process_grouped_json
-      run: |
-        import json, os
+      - name: Fetch list of APIs from SwaggerHub
+        run: |
+          curl -H "Authorization: $SWAGGERHUB_API_KEY" \
+               -H "Accept: application/json" \
+               "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
 
-        # Load SwaggerHub APIs response
-        with open("swaggerhub_apis.json") as file:
-            data = json.load(file)
+      - name: Process and group APIs from SwaggerHub
+        id: process_grouped_json
+        run: |
+          import json, os
 
-        # Initialize groups
-        groups = {
-            "PACS": [],
-            "PLUK": [],
-            "PLAI": [],
-            "PVA": [],
-            "PAMB": [],
-            "Symphony Big Group": []
-        }
+          # Load SwaggerHub APIs response
+          with open("swaggerhub_apis.json") as file:
+              data = json.load(file)
 
-        symphony_domains = {}  # For domain-based groups
+          # Initialize groups
+          groups = {
+              "PACS": [],
+              "PLUK": [],
+              "PLAI": [],
+              "PVA": [],
+              "PAMB": [],
+              "Symphony Big Group": []
+          }
 
-        # Process each API entry
-        for api in data['apis']:
-            name = api['name']
-            properties = {prop['type']: prop.get('value', prop.get('url', '')) for prop in api['properties']}
-            url = properties.get("Swagger", "")
-            slug = url.split("/")[-2] if url else ""
-            latest_version = properties.get("X-Version", "N/A")
+          symphony_domains = {}  # For domain-based groups
 
-            # Skip drafts
-            if "(DRAFT)" in name:
-                continue
+          # Process each API entry
+          for api in data['apis']:
+              name = api['name']
+              properties = {prop['type']: prop.get('value', prop.get('url', '')) for prop in api['properties']}
+              url = properties.get("Swagger", "")
+              slug = url.split("/")[-2] if url else ""
+              latest_version = properties.get("X-Version", "N/A")
 
-            # Remove "Prudential Symphony" and "API" from name
-            formatted_name = name.replace("Prudential Symphony", "").replace("API", "").strip()
+              # Skip drafts
+              if "(DRAFT)" in name:
+                  continue
 
-            # Determine group
-            if "PACS" in name:
-                groups["PACS"].append({
-                    "name": formatted_name,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "PLUK" in name:
-                groups["PLUK"].append({
-                    "name": formatted_name,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "PLAI" in name:
-                groups["PLAI"].append({
-                    "name": formatted_name,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "PVA" in name:
-                groups["PVA"].append({
-                    "name": formatted_name,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "PAMB" in name:
-                groups["PAMB"].append({
-                    "name": formatted_name,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "Prudential Symphony API" == name:  # Symphony Big Group
-                groups["Symphony Big Group"].append({
-                    "name": "Symphony",
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
-            elif "Prudential Symphony" in name:  # Domain-based grouping
-                domain = formatted_name
-                if domain not in symphony_domains:
-                    symphony_domains[domain] = []
-                symphony_domains[domain].append({
-                    "name": domain,
-                    "slug": slug,
-                    "latest_version": latest_version,
-                    "url": url
-                })
+              # Remove "Prudential Symphony" and "API" from name
+              formatted_name = name.replace("Prudential Symphony", "").replace("API", "").strip()
 
-        # Merge symphony domains with main groups
-        groups.update(symphony_domains)
+              # Determine group
+              if "PACS" in name:
+                  groups["PACS"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PLUK" in name:
+                  groups["PLUK"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PLAI" in name:
+                  groups["PLAI"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PVA" in name:
+                  groups["PVA"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "PAMB" in name:
+                  groups["PAMB"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "Prudential Symphony API" == name:  # Symphony Big Group
+                  groups["Symphony Big Group"].append({
+                      "name": "Symphony",
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
+              elif "Prudential Symphony" in name:  # Domain-based grouping
+                  domain = formatted_name
+                  if domain not in symphony_domains:
+                      symphony_domains[domain] = []
+                  symphony_domains[domain].append({
+                      "name": domain,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
+                  })
 
-        # Write the grouped data as JSON string to the environment file for output
-        with open(os.getenv("GITHUB_ENV"), "a") as env_file:
-            env_file.write(f"grouped_json={json.dumps(groups)}")
+          # Merge symphony domains with main groups
+          groups.update(symphony_domains)
 
-generate-folders-and-files:
-  runs-on: ubuntu-latest
-  environment: Production
-  needs: fetch-and-group-apis
+          # Save the grouped JSON to an environment file
+          with open("grouped_apis.json", "w") as outfile:
+              json.dump(groups, outfile, indent=2)
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Generate folders, files, and grouped_apis.json
-      run: |
-        import json, os
-
-        # Load grouped JSON data from previous job output
-        groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
-
-        # Save the consolidated file as grouped_apis.json
-        with open("grouped_apis.json", "w") as outfile:
-            json.dump(groups, outfile, indent=2)
-
-        # Create folders and files based on grouped data
-        for group_name, apis in groups.items():
-            folder_path = os.path.join("products", group_name)
-            os.makedirs(folder_path, exist_ok=True)
-
-            # Create empty files as placeholders
-            with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                manifest_file.write("{}")
-
-            with open(os.path.join(folder_path, "description.md"), "w") as description_file:
-                description_file.write(f"# {group_name}\n")
+          # Set grouped JSON as an output for Job 2 and beyond
+          print(f"grouped_json={json.dumps(groups)}")
 
     - name: Commit grouped_apis.json
       run: |
@@ -172,80 +146,115 @@ generate-folders-and-files:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-populate-content:
-  runs-on: ubuntu-latest
-  environment: Production
-  needs: generate-folders-and-files
+  generate-folders-and-files:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: fetch-and-group-apis
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    - name: Populate content in manifest.json and description.md
-      run: |
-        import json, os
+      - name: Generate folders and files
+        run: |
+          import json, os
 
-        # Load grouped JSON data from grouped_apis.json
-        with open("grouped_apis.json") as file:
-            groups = json.load(file)
+          # Load grouped JSON from consolidated file
+          with open("grouped_apis.json") as file:
+              groups = json.load(file)
 
-        # Populate each file with API data
-        for group_name, apis in groups.items():
-            folder_path = os.path.join("products", group_name)
-            
-            # Populate manifest.json with metadata for each API
-            manifest_content = {
-                "productMetadata": {
-                    "description": f"Symphony APIs for {group_name}",
-                    "slug": f"{group_name.lower()}-api",
-                    "public": True,
-                    "hidden": False,
-                    "logo": "images/icon.png",
-                    "logoDark": "images/icon-dark.png",
-                    "autoPublish": True,
-                    "validateAPIs": True
-                },
-                "contentMetadata": [
-                    {
-                        "order": 0,
-                        "parent": "",
-                        "name": "Description",
-                        "slug": "description",
-                        "type": "markdown",
-                        "contentUrl": "description.md"
-                    }
-                ]
-            }
+          # Create folders and files
+          for group_name, apis in groups.items():
+              folder_path = os.path.join("products", group_name)
+              os.makedirs(folder_path, exist_ok=True)
 
-            # Add each API as a contentMetadata entry
-            for i, api in enumerate(apis, start=1):
-                manifest_content["contentMetadata"].append({
-                    "order": i,
-                    "parent": "",
-                    "name": api["name"],
-                    "slug": api["slug"],
-                    "type": "apiUrl",
-                    "contentUrl": f"{api['url']}/swagger.json"
-                })
+              # Create manifest.json and description.md
+              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
+                  manifest_file.write("{}")
 
-            # Write manifest.json with the updated content
-            with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                json.dump(manifest_content, manifest_file, indent=2)
+              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
+                  description_file.write(f"# {group_name}\n")
 
-            # Populate description.md with the revised header and list of APIs
-            description_content = f"# {group_name} Group\nThis page contains APIs related to {group_name}.\n\n## APIs in this group\n"
-            for api in apis:
-                description_content += f"- **{api['name']}** (v{api['latest_version']})\n"
-            
-            with open(os.path.join(folder_path, "description.md"), "w") as description_file:
-                description_file.write(description_content)
+      - name: Commit generated folders and files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add products/
+          git commit -m "Create folders and placeholders for manifest.json and description.md"
+          git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Commit generated files
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add products/
-        git commit -m "Generate and populate manifest.json and description.md for each group"
-        git push
+  populate-content:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: generate-folders-and-files
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Populate content in manifest.json and description.md
+        run: |
+          import json, os
+
+          # Load grouped JSON data from grouped_apis.json
+          with open("grouped_apis.json") as file:
+              groups = json.load(file)
+
+          for group_name, apis in groups.items():
+              folder_path = os.path.join("products", group_name)
+              
+              # Create manifest.json content
+              manifest_content = {
+                  "productMetadata": {
+                      "description": f"Symphony APIs for {group_name}",
+                      "slug": f"{group_name.lower()}-api",
+                      "public": True,
+                      "hidden": False,
+                      "logo": "images/icon.png",
+                      "logoDark": "images/icon-dark.png",
+                      "autoPublish": True,
+                      "validateAPIs": True
+                  },
+                  "contentMetadata": [
+                      {
+                          "order": 0,
+                          "parent": "",
+                          "name": "Description",
+                          "slug": "description",
+                          "type": "markdown",
+                          "contentUrl": "description.md"
+                      }
+                  ]
+              }
+
+              for i, api in enumerate(apis, start=1):
+                  manifest_content["contentMetadata"].append({
+                      "order": i,
+                      "parent": "",
+                      "name": api["name"],
+                      "slug": api["slug"],
+                      "type": "apiUrl",
+                      "contentUrl": f"{api['url']}/swagger.json"
+                  })
+
+              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
+                  json.dump(manifest_content, manifest_file, indent=2)
+
+              description_content = f"# {group_name} Group\nThis page contains APIs related to {group_name}.\n\n## APIs in this group\n"
+              for api in apis:
+                  description_content += f"- **{api['name']}** (v{api['latest_version']})\n"
+
+              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
+                  description_file.write(description_content)
+
+      - name: Commit populated files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add products/
+          git commit -m "Populate manifest.json and description.md with API data"
+          git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
