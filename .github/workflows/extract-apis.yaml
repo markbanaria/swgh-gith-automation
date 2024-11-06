@@ -196,9 +196,10 @@ jobs:
 
               # Create and populate description.md
               with open(os.path.join(folder_path, 'description.md'), 'w') as description_file:
-                  description_file.write(f'# {group_name}\\n\\nThis page contains APIs related to {group_name}.\\n')
+                  description_file.write(f"# {group_name}\n\nThis page contains APIs related to {group_name}.\n")
                   for api in apis:
-                      description_file.write(f'- {api["name"]} (Version: {api["latest_version"]})\\n')
+                      description_file.write(f"- {api['name']} (Version: {api['latest_version']})\n")
+
         shell: python
 
       - name: Commit and push changes
