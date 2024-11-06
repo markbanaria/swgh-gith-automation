@@ -163,3 +163,17 @@ jobs:
               with open(os.path.join(folder_path, "description.md"), "w") as description_file:
                   description_file.write(f"# {group_name}\n")  # Placeholder title for description
         shell: python
+
+      - name: List directory structure
+        run: |
+          echo "Directory structure:"
+          find products/ -type d -or -type f
+
+      - name: Display file contents for verification
+        run: |
+          echo "Contents of manifest.json and description.md for each group:"
+          for dir in products/*; do
+            echo "Directory: $dir"
+            cat "$dir/manifest.json"
+            cat "$dir/description.md"
+          done
