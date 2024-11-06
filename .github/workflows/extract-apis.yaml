@@ -145,7 +145,7 @@ jobs:
   
       - name: Create folders, update content, and commit files for each group
         run: |
-          python 3 -c "
+          python3 -c "
             import json, os
 
             # Load grouped JSON data from Job 1 output
