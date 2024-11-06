@@ -1,4 +1,4 @@
-name: Extract API Details
+name: Generate Configs (Cron)
 
 on:
   schedule:
@@ -8,18 +8,18 @@ on:
       log_level:
         description: 'Log level: 1=DEBUG, 2=INFO, 3=WARNING, 4=ERROR'
         required: false
-        default: '2' # Set the default log level to INFO
+        default: '2'
       skip_api_linting:
         description: 'Skip the API linting job'
         required: false
-        default: 'false'        
+        default: 'false'
 
 env:
   SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
   SWAGGERHUB_ORG_NAME: ${{ vars.SWAGGERHUB_ORG_NAME }}
 
 jobs:
-  configure-readme-and-config:
+  fetch-and-group-apis:
     runs-on: ubuntu-latest
     environment: Production
 
@@ -125,7 +125,39 @@ jobs:
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Print grouped data to console
-          print(json.dumps(groups, indent=2))
+          # Save grouped data to a JSON file
+          with open("grouped_apis.json", "w") as outfile:
+              json.dump(groups, outfile, indent=2)
 
+        shell: python
+
+  generate-folders-and-files:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: fetch-and-group-apis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Load grouped APIs data
+        run: |
+          import json, os
+
+          # Load grouped data
+          with open("grouped_apis.json") as file:
+              groups = json.load(file)
+
+          # Iterate over each group to create folders and files
+          for group_name, apis in groups.items():
+              # Create the folder path
+              folder_path = os.path.join("products", group_name)
+              os.makedirs(folder_path, exist_ok=True)
+
+              # Create manifest.json and description.md
+              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
+                  manifest_file.write("{}")  # Placeholder, content will be added in next job
+
+              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
+                  description_file.write(f"# {group_name}\n")  # Placeholder title for description
         shell: python
