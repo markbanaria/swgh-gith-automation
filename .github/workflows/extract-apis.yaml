@@ -149,7 +149,7 @@ jobs:
           import json, os
 
           # Load grouped JSON data from Job 1 output
-          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
+          groups = json.loads(\"\"\"${{ needs.fetch-and-group-apis.outputs.grouped_json }}\"\"\")
 
           # Iterate over each group to create folders and update content
           for group_name, apis in groups.items():
