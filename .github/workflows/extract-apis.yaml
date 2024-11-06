@@ -1,4 +1,4 @@
-name: Publish Portal Content (Cron)
+name: Extract API Details
 
 on:
   schedule:
@@ -125,8 +125,7 @@ jobs:
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Save grouped data to a JSON file
-          with open("grouped_apis.json", "w") as outfile:
-              json.dump(groups, outfile, indent=2)
+          # Print grouped data to console
+          print(json.dumps(groups, indent=2))
 
         shell: python
