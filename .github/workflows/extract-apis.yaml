@@ -23,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: Production
 
+    outputs:
+      grouped_json: ${{ steps.process_grouped_json.outputs.grouped_data }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -34,6 +37,7 @@ jobs:
                "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
 
       - name: Process and group APIs from SwaggerHub
+        id: process_grouped_json
         run: |
           import json
 
@@ -125,9 +129,8 @@ jobs:
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Save grouped data to a JSON file
-          with open("grouped_apis.json", "w") as outfile:
-              json.dump(groups, outfile, indent=2)
+          # Set the output for the grouped JSON
+          print("::set-output name=grouped_data::" + json.dumps(groups))
 
         shell: python
 
@@ -140,13 +143,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Load grouped APIs data
+      - name: Create folders and files for each group
         run: |
           import json, os
 
-          # Load grouped data
-          with open("grouped_apis.json") as file:
-              groups = json.load(file)
+          # Load grouped JSON data from previous job output
+          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
 
           # Iterate over each group to create folders and files
           for group_name, apis in groups.items():
