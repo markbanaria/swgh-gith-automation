@@ -143,15 +143,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
   
-      - name: Create and update folders and files for each group
+      - name: Create folders, update content, and commit files for each group
         run: |
           import json, os
   
           # Load grouped JSON data from Job 1 output
-          grouped_json = '${{ needs.fetch-and-group-apis.outputs.grouped_json }}'
-          groups = json.loads(grouped_json)
+          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
   
-          # Iterate over each group to create folders and populate files
+          # Iterate over each group to create folders, update content, and commit
           for group_name, apis in groups.items():
               folder_path = os.path.join("products", group_name)
               os.makedirs(folder_path, exist_ok=True)
@@ -198,9 +197,9 @@ jobs:
                   for api in apis:
                       description_file.write(f"- {api['name']} (Version: {api['latest_version']})\n")
   
-      - name: List directory structure
+      - name: List directory structure for verification
         run: |
-          echo "Directory structure:"
+          echo "Directory structure after content update:"
           find products/ -type d -or -type f
   
       - name: Display file contents for verification
