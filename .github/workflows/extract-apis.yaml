@@ -52,7 +52,7 @@ jobs:
               "PLAI": [],
               "PVA": [],
               "PAMB": [],
-              "Symphony": []
+              "All Symphony": []
           }
 
           symphony_domains = {}  # For domain-based groups
@@ -108,8 +108,8 @@ jobs:
                       "latest_version": latest_version,
                       "url": url
                   })
-              elif "Prudential Symphony API" == name:  # All Symphony APIs
-                  groups["All Symphony APIs"].append({
+              elif "Prudential Symphony API" == name:  # All Symphony
+                  groups["All Symphony"].append({
                       "name": "Symphony",
                       "slug": slug,
                       "latest_version": latest_version,
