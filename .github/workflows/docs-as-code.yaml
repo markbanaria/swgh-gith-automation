@@ -12,6 +12,26 @@ env:
   LOG_LEVEL: ${{ github.event.inputs.log_level }}
 
 jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: Production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install cspell
+        run: npm install -g cspell
+
+      - name: Run cspell
+        run: cspell --config ./.cspell.json "./products/**/*.md"
+
   validate-manifests:
     runs-on: ubuntu-latest
     environment: Production

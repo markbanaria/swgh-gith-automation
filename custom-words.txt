@@ -12,3 +12,8 @@ Playfair
 Roboto
 SmartBear
 SWAGGERHUB
+PLAI
+PACS
+PVA
+PAMB
+PLUK
