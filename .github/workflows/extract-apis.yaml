@@ -134,72 +134,29 @@ jobs:
 
         shell: python
 
-  generate-folders-and-files:
+  generate-folders-and-update-content:
     runs-on: ubuntu-latest
     environment: Production
     needs: fetch-and-group-apis
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Create folders and files for each group
-        run: |
-          import json, os
-
-          # Load grouped JSON data from previous job output
-          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
-
-          # Iterate over each group to create folders and files
-          for group_name, apis in groups.items():
-              # Create the folder path
-              folder_path = os.path.join("products", group_name)
-              os.makedirs(folder_path, exist_ok=True)
-
-              # Create manifest.json and description.md
-              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                  manifest_file.write("{}")  # Placeholder, content will be added in next job
-
-              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
-                  description_file.write(f"# {group_name}\n")  # Placeholder title for description
-        shell: python
-
-      - name: List directory structure
-        run: |
-          echo "Directory structure:"
-          find products/ -type d -or -type f
-
-      - name: Display file contents for verification
-        run: |
-          echo "Contents of manifest.json and description.md for each group:"
-          for dir in products/*; do
-            echo "Directory: $dir"
-            cat "$dir/manifest.json"
-            cat "$dir/description.md"
-          done
-  
-  update-content:
-    runs-on: ubuntu-latest
-    environment: Production
-    needs: [fetch-and-group-apis, generate-folders-and-files]
   
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
   
-      - name: Update content in manifest.json and description.md
+      - name: Create and update folders and files for each group
         run: |
           import json, os
   
-          # Load the grouped JSON data from Job 1 output
+          # Load grouped JSON data from Job 1 output
           grouped_json = '${{ needs.fetch-and-group-apis.outputs.grouped_json }}'
           groups = json.loads(grouped_json)
   
-          # Iterate over each group to update files
+          # Iterate over each group to create folders and populate files
           for group_name, apis in groups.items():
               folder_path = os.path.join("products", group_name)
+              os.makedirs(folder_path, exist_ok=True)
   
-              # Update manifest.json
+              # Create and populate manifest.json
               manifest_data = {
                   "productMetadata": {
                       "description": f"{group_name} APIs",
@@ -235,10 +192,32 @@ jobs:
               with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
                   json.dump(manifest_data, manifest_file, indent=2)
   
-              # Update description.md
+              # Create and populate description.md
               with open(os.path.join(folder_path, "description.md"), "w") as description_file:
                   description_file.write(f"# {group_name}\n\nThis page contains APIs related to {group_name}.\n")
                   for api in apis:
                       description_file.write(f"- {api['name']} (Version: {api['latest_version']})\n")
   
-        shell: python
+      - name: List directory structure
+        run: |
+          echo "Directory structure:"
+          find products/ -type d -or -type f
+  
+      - name: Display file contents for verification
+        run: |
+          echo "Contents of manifest.json and description.md for each group:"
+          for dir in products/*; do
+            echo "Directory: $dir"
+            cat "$dir/manifest.json"
+            cat "$dir/description.md"
+          done
+  
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add products
+          git commit -m "Add generated products folders and files"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
