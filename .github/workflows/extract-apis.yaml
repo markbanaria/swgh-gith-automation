@@ -34,21 +34,22 @@ jobs:
               "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
 
       - name: Process and group APIs from SwaggerHub
+        id: process_grouped_json
         run: |
-          python3 -c "
           import json
 
-          with open('swaggerhub_apis.json') as file:
-            data = json.load(file)
+          # Load SwaggerHub APIs response
+          with open("swaggerhub_apis.json") as file:
+              data = json.load(file)
 
           # Initialize groups
           groups = {
-            'PACS': [],
-            'PLUK': [],
-            'PLAI': [],
-            'PVA': [],
-            'PAMB': [],
-            'Symphony Big Group': []
+              "PACS": [],
+              "PLUK": [],
+              "PLAI": [],
+              "PVA": [],
+              "PAMB": [],
+              "Symphony Big Group": []
           }
 
           symphony_domains = {}  # For domain-based groups
@@ -57,135 +58,119 @@ jobs:
           for api in data['apis']:
               name = api['name']
               properties = {prop['type']: prop.get('value', prop.get('url', '')) for prop in api['properties']}
-              url = properties.get('Swagger', '')
-              slug = url.split('/')[-2] if url else ''
-              latest_version = properties.get('X-Version', 'N/A')
+              url = properties.get("Swagger", "")
+              slug = url.split("/")[-2] if url else ""
+              latest_version = properties.get("X-Version", "N/A")
 
               # Skip drafts
-              if '(DRAFT)' in name:
+              if "(DRAFT)" in name:
                   continue
 
-              # Remove 'Prudential Symphony' and 'API' from name
-              formatted_name = name.replace('Prudential Symphony', '').replace('API', '').strip()
+              # Remove "Prudential Symphony" and "API" from name
+              formatted_name = name.replace("Prudential Symphony", "").replace("API", "").strip()
 
               # Determine group
-              if 'PACS' in name:
-                  groups['PACS'].append({
-                      'name': formatted_name,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              if "PACS" in name:
+                  groups["PACS"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'PLUK' in name:
-                  groups['PLUK'].append({
-                      'name': formatted_name,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              elif "PLUK" in name:
+                  groups["PLUK"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'PLAI' in name:
-                  groups['PLAI'].append({
-                      'name': formatted_name,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              elif "PLAI" in name:
+                  groups["PLAI"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'PVA' in name:
-                  groups['PVA'].append({
-                      'name': formatted_name,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              elif "PVA" in name:
+                  groups["PVA"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'PAMB' in name:
-                  groups['PAMB'].append({
-                      'name': formatted_name,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              elif "PAMB" in name:
+                  groups["PAMB"].append({
+                      "name": formatted_name,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'Prudential Symphony API' == name:  # Symphony Big Group
-                  groups['Symphony Big Group'].append({
-                      'name': 'Symphony',
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+              elif "Prudential Symphony API" == name:  # Symphony Big Group
+                  groups["Symphony Big Group"].append({
+                      "name": "Symphony",
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
-              elif 'Prudential Symphony' in name:  # Domain-based grouping
+              elif "Prudential Symphony" in name:  # Domain-based grouping
                   domain = formatted_name
                   if domain not in symphony_domains:
                       symphony_domains[domain] = []
                   symphony_domains[domain].append({
-                      'name': domain,
-                      'slug': slug,
-                      'latest_version': latest_version,
-                      'url': url
+                      "name": domain,
+                      "slug": slug,
+                      "latest_version": latest_version,
+                      "url": url
                   })
 
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Write the grouped data to a file for Job 2
-          with open('grouped_apis.json', 'w') as outfile:
-              json.dump(groups, outfile, indent=2)
-          "
-          
-      - name: Commit grouped_apis.json
+          # Save the grouped data to an environment variable for Job 2
+          with open("${{ github.env }}", "a") as env_file:
+              env_file.write(f"GROUPED_JSON={json.dumps(groups)}")
+
+  generate-folders-and-files:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: fetch-and-group-apis
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create folders and files for each group
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add grouped_apis.json
-          git commit -m "Add consolidated grouped_apis.json file"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          import json, os
 
-generate-folders-and-files:
-  runs-on: ubuntu-latest
-  environment: Production
-  needs: fetch-and-group-apis
+          # Load grouped JSON data from environment variable
+          groups = json.loads(os.getenv("GROUPED_JSON", "{}"))
 
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+          # Iterate over each group to create folders and files
+          for group_name, apis in groups.items():
+              # Create the folder path
+              folder_path = os.path.join("products", group_name)
+              os.makedirs(folder_path, exist_ok=True)
 
-    - name: Create folders and files for each group
-      run: |
-        import json, os
+              # Create manifest.json and description.md
+              with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
+                  manifest_file.write("{}")  # Placeholder, content will be added in next job
 
-        # Check if grouped_apis.json exists and is not empty
-        if not os.path.exists("grouped_apis.json") or os.stat("grouped_apis.json").st_size == 0:
-            raise FileNotFoundError("grouped_apis.json not found or is empty.")
+              with open(os.path.join(folder_path, "description.md"), "w") as description_file:
+                  description_file.write(f"# {group_name}\n")  # Placeholder title for description
+        shell: python
 
-        # Load grouped JSON data
-        with open("grouped_apis.json") as file:
-            groups = json.load(file)
+      - name: List directory structure
+        run: |
+          echo "Directory structure:"
+          find products/ -type d -or -type f
 
-        # Iterate over each group to create folders and files
-        for group_name, apis in groups.items():
-            # Create the folder path
-            folder_path = os.path.join("products", group_name)
-            os.makedirs(folder_path, exist_ok=True)
-
-            # Create manifest.json and description.md
-            with open(os.path.join(folder_path, "manifest.json"), "w") as manifest_file:
-                manifest_file.write("{}")  # Placeholder, content will be added in next job
-
-            with open(os.path.join(folder_path, "description.md"), "w") as description_file:
-                description_file.write(f"# {group_name}\n")  # Placeholder title for description
-      shell: python
-
-    - name: List directory structure
-      run: |
-        echo "Directory structure:"
-        find products/ -type d -or -type f
-
-    - name: Display file contents for verification
-      run: |
-        echo "Contents of manifest.json and description.md for each group:"
-        for dir in products/*; do
-          echo "Directory: $dir"
-          cat "$dir/manifest.json"
-          cat "$dir/description.md"
-        done
+      - name: Display file contents for verification
+        run: |
+          echo "Contents of manifest.json and description.md for each group:"
+          for dir in products/*; do
+            echo "Directory: $dir"
+            cat "$dir/manifest.json"
+            cat "$dir/description.md"
+          done
 
