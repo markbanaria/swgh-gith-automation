@@ -1,7 +1,7 @@
 {
     "productMetadata": {
-        "description": "Symphony APIs for PACS",
-        "slug": "pacs-api",
+        "description": "Test for PACS",
+        "slug": "test111-api",
         "public": true,
         "hidden": false,
         "logo": "images/icon.png",
