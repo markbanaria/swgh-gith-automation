@@ -20,6 +20,7 @@ env:
   SWAGGERHUB_API_KEY: ${{ secrets.SWAGGERHUB_API_KEY }}
   LOG_LEVEL: ${{ github.event.inputs.log_level }}
 
+jobs:
   validate-manifests:
     runs-on: ubuntu-latest
     environment: Production
