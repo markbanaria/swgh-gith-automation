@@ -22,9 +22,8 @@ jobs:
   fetch-and-group-apis:
     runs-on: ubuntu-latest
     environment: Production
-
     outputs:
-      grouped_json: ${{ steps.process_grouped_json.outputs.grouped_data }}
+      grouped_file: grouped_apis.json  # Save JSON to a file instead of inline output
 
     steps:
       - name: Checkout repository
@@ -37,22 +36,22 @@ jobs:
                "https://api.swaggerhub.com/apis/${{ env.SWAGGERHUB_ORG_NAME }}?limit=100" > swaggerhub_apis.json
 
       - name: Process and group APIs from SwaggerHub
-        id: process_grouped_json
         run: |
+          python3 -c "
           import json
 
           # Load SwaggerHub APIs response
-          with open("swaggerhub_apis.json") as file:
+          with open('swaggerhub_apis.json') as file:
               data = json.load(file)
 
           # Initialize groups
           groups = {
-              "PACS": [],
-              "PLUK": [],
-              "PLAI": [],
-              "PVA": [],
-              "PAMB": [],
-              "Symphony Big Group": []
+              'PACS': [],
+              'PLUK': [],
+              'PLAI': [],
+              'PVA': [],
+              'PAMB': [],
+              'Symphony Big Group': []
           }
 
           symphony_domains = {}  # For domain-based groups
@@ -61,96 +60,107 @@ jobs:
           for api in data['apis']:
               name = api['name']
               properties = {prop['type']: prop.get('value', prop.get('url', '')) for prop in api['properties']}
-              url = properties.get("Swagger", "")
-              slug = url.split("/")[-2] if url else ""
-              latest_version = properties.get("X-Version", "N/A")
+              url = properties.get('Swagger', '')
+              slug = url.split('/')[-2] if url else ''
+              latest_version = properties.get('X-Version', 'N/A')
 
               # Skip drafts
-              if "(DRAFT)" in name:
+              if '(DRAFT)' in name:
                   continue
 
-              # Remove "Prudential Symphony" and "API" from name
-              formatted_name = name.replace("Prudential Symphony", "").replace("API", "").strip()
+              # Remove 'Prudential Symphony' and 'API' from name
+              formatted_name = name.replace('Prudential Symphony', '').replace('API', '').strip()
 
               # Determine group
-              if "PACS" in name:
-                  groups["PACS"].append({
-                      "name": formatted_name,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              if 'PACS' in name:
+                  groups['PACS'].append({
+                      'name': formatted_name,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "PLUK" in name:
-                  groups["PLUK"].append({
-                      "name": formatted_name,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              elif 'PLUK' in name:
+                  groups['PLUK'].append({
+                      'name': formatted_name,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "PLAI" in name:
-                  groups["PLAI"].append({
-                      "name": formatted_name,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              elif 'PLAI' in name:
+                  groups['PLAI'].append({
+                      'name': formatted_name,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "PVA" in name:
-                  groups["PVA"].append({
-                      "name": formatted_name,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              elif 'PVA' in name:
+                  groups['PVA'].append({
+                      'name': formatted_name,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "PAMB" in name:
-                  groups["PAMB"].append({
-                      "name": formatted_name,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              elif 'PAMB' in name:
+                  groups['PAMB'].append({
+                      'name': formatted_name,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "Prudential Symphony API" == name:  # Symphony Big Group
-                  groups["Symphony Big Group"].append({
-                      "name": "Symphony",
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+              elif 'Prudential Symphony API' == name:  # Symphony Big Group
+                  groups['Symphony Big Group'].append({
+                      'name': 'Symphony',
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
-              elif "Prudential Symphony" in name:  # Domain-based grouping
+              elif 'Prudential Symphony' in name:  # Domain-based grouping
                   domain = formatted_name
                   if domain not in symphony_domains:
                       symphony_domains[domain] = []
                   symphony_domains[domain].append({
-                      "name": domain,
-                      "slug": slug,
-                      "latest_version": latest_version,
-                      "url": url
+                      'name': domain,
+                      'slug': slug,
+                      'latest_version': latest_version,
+                      'url': url
                   })
 
           # Merge symphony domains with main groups
           groups.update(symphony_domains)
 
-          # Set the output for the grouped JSON
-          print("::set-output name=grouped_data::" + json.dumps(groups))
-
-        shell: python
+          # Write the grouped data to a JSON file
+          with open('grouped_apis.json', 'w') as outfile:
+              json.dump(groups, outfile, indent=2)
+          "
+      - name: Upload grouped JSON
+        uses: actions/upload-artifact@v2
+        with:
+          name: grouped_json
+          path: grouped_apis.json
 
   generate-folders-and-content:
     runs-on: ubuntu-latest
     environment: Production
     needs: fetch-and-group-apis
-    
+  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-    
+
+      - name: Download grouped JSON artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: grouped_json
+          path: .
+
       - name: Create folders, populate content, and commit files for each group
         run: |
           python3 -c "
-
           import json, os
 
-          # Load grouped JSON data from Job 1 output
-          groups = json.loads('${{ needs.fetch-and-group-apis.outputs.grouped_json }}')
+          # Load grouped JSON data from downloaded file
+          with open('grouped_apis.json') as f:
+              groups = json.load(f)
 
           # Iterate over each group to create folders, populate content, and commit changes
           for group_name, apis in groups.items():
@@ -199,21 +209,7 @@ jobs:
                   for api in apis:
                       description_file.write(f'- {api["name"]} (Version: {api["latest_version"]})\\n')
           "
-    
-      - name: List directory structure for verification
-        run: |
-          echo "Directory structure after content update:"
-          find products/ -type d -or -type f
-    
-      - name: Display file contents for verification
-        run: |
-          echo "Contents of manifest.json and description.md for each group:"
-          for dir in products/*; do
-            echo "Directory: $dir"
-            cat "$dir/manifest.json"
-            cat "$dir/description.md"
-          done
-    
+
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
