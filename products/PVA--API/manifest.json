@@ -1,0 +1,22 @@
+{
+  "productMetadata": {
+    "description": "PVA APIs",
+    "slug": "pva-api",
+    "public": true,
+    "hidden": false,
+    "logo": "",
+    "logoDark": "",
+    "autoPublish": true,
+    "validateAPIs": true
+  },
+  "contentMetadata": [
+    {
+      "order": 0,
+      "parent": "",
+      "name": "Description",
+      "slug": "description",
+      "type": "markdown",
+      "contentUrl": "description.md"
+    }
+  ]
+}
